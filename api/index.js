@@ -25,12 +25,11 @@ mongoose
 app.use("/api/orders", orderRoutes); // ✅ Correct placement for API routes
 
 // ✅ Serve React App (Static Files)
-const distPath = path.join(__dirname, "/PocketWala/dist");
-app.use(express.static(distPath));
+app.use(express.static(path.join(__dirname, "/PocketWala/dist")));
 
 // ✅ Serve React App for any unknown route (after API routes)
 app.get("*", (req, res) => {
-  res.sendFile(path.join(distPath, "index.html"));
+  res.sendFile(path.join(__dirname, 'PocketWala', 'dist', "index.html"));
 });
 
 // ✅ Default Route
