@@ -7,6 +7,7 @@ import imgage3 from "../assets/frontA4.png";
 import image4 from "../assets/frontA3.png";
 import image5 from "../assets/backA4.png";
 import image6 from "../assets/backA3.png";
+import { Link } from "react-router-dom";
 
 function Order() {
   const [selectedSizes, setSelectedSizes] = useState([]);
@@ -80,7 +81,7 @@ function Order() {
               size,
               color,
               quantity,
-              price: 120, // Fixed price (you can calculate dynamically)
+              price: quantity*120, // Fixed price (you can calculate dynamically)
             });
           }
         });
@@ -105,6 +106,11 @@ function Order() {
     <div className="flex flex-col lg:flex-row w-full gap-10 p-6">
       {/* Left Section (Product Image, Size & Color Selection) */}
       <div className="lg:w-1/2">
+      <Link to="/admin">
+        <button className="bg-blue-500 text-white px-4 py-2 rounded-md mb-4">
+          Go to Admin
+        </button>
+      </Link>
         <div className="p-6 max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center">Polyester Dryfit T-Shirt</h2>
 
