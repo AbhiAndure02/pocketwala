@@ -21,10 +21,10 @@ mongoose.connect("mongodb+srv://abhiandure123:abhishek@cluster0.oxo6h.mongodb.ne
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-app.use(express.static(path.join(__dirname, "/pocketWala/dist")));
+app.use(express.static(path.join(__dirname, "/PocketWala/dist")));
 
 app.get("*", (req, res)=> {
-  res.sendFile(path.join(__dirname,"pocketWala", "pocketWala/dist", "index.html"));
+  res.sendFile(path.join(__dirname,"PocketWala", "PocketWala/dist", "index.html"));
 }
 )
 app.get("/", (req, res) => {
