@@ -8,7 +8,7 @@ function Admin() {
   // Fetch all orders from backend
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/orders") // Change this to match your backend API route
+      .get("/api/orders") // Change this to match your backend API route
       .then((response) => {
         setOrders(response.data);
         setLoading(false);
