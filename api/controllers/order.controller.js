@@ -3,7 +3,7 @@ import Order from "../models/order.model.js";
 // Create a new order
 export const createOrder = async (req, res) => {
     try {
-        const {  items } = req.body;
+        const { items } = req.body;
 
         if (!items || !Array.isArray(items) || items.length === 0) {
             return res.status(400).json({ message: "Invalid items data" });
