@@ -40,6 +40,7 @@ function Order() {
   const [selectedPlacement, setSelectedPlacement] = useState([]);
   const [quantities, setQuantities] = useState({});
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef(null);
 
   const getActiveSelections = () => {
@@ -81,8 +82,12 @@ function Order() {
       if (!selectedColors.includes(color)) setSelectedColors(prev => [...prev, color]);
       if (!selectedSizes.includes(size)) setSelectedSizes(prev => [...prev, size]);
     } else {
-      const hasColorQuantities = Object.keys(quantities).some(k => k.startsWith(`${color}-`) && quantities[k] > 0);
-      const hasSizeQuantities = Object.keys(quantities).some(k => k.endsWith(`-${size}`) && quantities[k] > 0);
+      const hasColorQuantities = Object.keys(quantities).some(
+        k => k.startsWith(`${color}-`) && quantities[k] > 0
+      );
+      const hasSizeQuantities = Object.keys(quantities).some(
+        k => k.endsWith(`-${size}`) && quantities[k] > 0
+      );
       
       if (!hasColorQuantities) setSelectedColors(prev => prev.filter(c => c !== color));
       if (!hasSizeQuantities) setSelectedSizes(prev => prev.filter(s => s !== size));
@@ -90,35 +95,63 @@ function Order() {
   };
 
   const handleSubmit = async () => {
-    if (selectedPlacement.length === 0) return alert("Please select at least one placement");
+    if (selectedPlacement.length === 0) {
+      alert("Please select at least one placement");
+      return;
+    }
 
+    // Prepare items array according to your schema
     const items = [];
+    let hasItems = false;
+    
+    // First collect all color-size combinations with quantities > 0
     Object.keys(colorMap).forEach(color => {
       sizes.forEach(size => {
         const quantity = quantities[`${color}-${size}`] || 0;
         if (quantity > 0) {
+          hasItems = true;
+          // For each placement selected, create a separate item
           selectedPlacement.forEach(placement => {
             items.push({
-              placement,
-              size,
               color,
+              size,
               quantity,
               price: quantity * 120,
-              design: uploadedImage,
+              placement,
+             
             });
           });
         }
       });
     });
 
-    if (items.length === 0) return alert("Please select at least one item with quantity > 0");
+    if (!hasItems) {
+      alert("Please select at least one item with quantity greater than 0");
+      return;
+    }
 
+    setIsSubmitting(true);
     try {
-      await axios.post("/api/orders", { items });
-      alert("Order Submitted Successfully!");
+      const response = await axios.post("/api/orders", {
+        items,
+        designImage: uploadedImage
+      });
+      alert("Order submitted successfully!");
+      console.log("Order response:", response.data);
+      
+      // Reset form after successful submission
+      setSelectedPlacement([]);
+      setSelectedColors([]);
+      setSelectedSizes([]);
+      setQuantities({});
+      setUploadedImage(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      
     } catch (error) {
-      console.error("Error submitting order:", error);
-      alert("Failed to submit order!");
+      console.error("Order submission error:", error);
+      alert("Failed to submit order. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -130,72 +163,66 @@ function Order() {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Left Column - Product */}
         <div className="lg:w-1/2 bg-white rounded-xl shadow-md p-4">
-  <div className="flex flex-col items-center">
-    <img src={img} alt="T-shirt" className="w-64 h-auto rounded-lg mb-4" />
-
-    <div className="text-center mb-4">
-      <h2 className="text-xl font-bold">Premium Dryfit T-Shirt</h2>
-      <p className="text-gray-600">180 GSM Micro Fabric</p>
-      <div className="flex justify-center items-center gap-2 mt-2">
-        <span className="text-2xl font-bold text-indigo-700">₹120</span>
-        <span className="line-through text-gray-400">₹240</span>
-      </div>
-    </div>
-
-    {/* Moved Colors & Sizes up here */}
-    <div className="w-full">
-      <div className="mb-2">
-        <h3 className="font-semibold mb-1 flex items-center">
-          <span className="w-3 h-3 bg-indigo-500 rounded-full mr-2"></span>
-          Selected Colors
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {activeColors.length > 0 ? (
-            activeColors.map(color => (
-              <div key={color} className="flex items-center px-2 py-1 bg-indigo-50 rounded-full">
-                <span
-                  className="w-4 h-4 rounded-full mr-1 border border-gray-300"
-                  style={{ backgroundColor: colorMap[color] }}
-                ></span>
-                <span className="text-xs">{color}</span>
+          <div className="flex flex-col items-center">
+            <img src={img} alt="T-shirt" className="w-64 h-auto rounded-lg mb-4" />
+            
+            <div className="text-center mb-4">
+              <h2 className="text-xl font-bold">Premium Dryfit T-Shirt</h2>
+              <p className="text-gray-600">180 GSM Micro Fabric</p>
+              <div className="flex justify-center items-center gap-2 mt-2">
+                <span className="text-2xl font-bold text-indigo-700">₹120</span>
+                <span className="line-through text-gray-400">₹240</span>
               </div>
-            ))
-          ) : (
-            <span className="text-gray-400 text-sm">No colors selected</span>
-          )}
+            </div>
+            
+            <div className="w-full">
+              <h3 className="font-semibold mb-2 flex items-center">
+                <span className="w-3 h-3 bg-indigo-500 rounded-full mr-2"></span>
+                Selected Colors
+              </h3>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {activeColors.length > 0 ? (
+                  activeColors.map(color => (
+                    <div key={color} className="flex items-center px-2 py-1 bg-indigo-50 rounded-full">
+                      <span 
+                        className="w-4 h-4 rounded-full mr-1 border border-gray-300"
+                        style={{ backgroundColor: colorMap[color] }}
+                      ></span>
+                      <span className="text-xs">{color}</span>
+                    </div>
+                  ))
+                ) : (
+                  <span className="text-gray-400 text-sm">No colors selected</span>
+                )}
+              </div>
+              
+              <h3 className="font-semibold mb-2 flex items-center">
+                <span className="w-3 h-3 bg-indigo-500 rounded-full mr-2"></span>
+                Selected Sizes
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {activeSizes.length > 0 ? (
+                  activeSizes.map(size => (
+                    <span 
+                      key={size} 
+                      className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs font-medium"
+                    >
+                      {size}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-gray-400 text-sm">No sizes selected</span>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <div className="mb-2">
-        <h3 className="font-semibold mb-1 flex items-center">
-          <span className="w-3 h-3 bg-indigo-500 rounded-full mr-2"></span>
-          Selected Sizes
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {activeSizes.length > 0 ? (
-            activeSizes.map(size => (
-              <span
-                key={size}
-                className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs font-medium"
-              >
-                {size}
-              </span>
-            ))
-          ) : (
-            <span className="text-gray-400 text-sm">No sizes selected</span>
-          )}
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 
         {/* Right Column - Customization */}
         <div className="lg:w-1/2 bg-white rounded-xl shadow-md p-4">
           {/* Placement */}
           <div className="mb-6">
-            <h2 className="text-lg font-bold mb-3 text-indigo-800">Design Placement</h2>
+            <h2 className="text-lg font-bold mb-3 text-indigo-800">Design Placement (Required)</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {placements.map(({ name, img }) => (
                 <label 
@@ -341,14 +368,14 @@ function Order() {
         
         <button 
           onClick={handleSubmit}
-          disabled={selectedPlacement.length === 0 || activeColors.length === 0 || activeSizes.length === 0}
+          disabled={selectedPlacement.length === 0 || activeColors.length === 0 || activeSizes.length === 0 || isSubmitting}
           className={`mt-4 w-full py-2 rounded-lg font-medium transition-colors ${
             selectedPlacement.length === 0 || activeColors.length === 0 || activeSizes.length === 0
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-indigo-600 hover:bg-indigo-700 text-white"
           }`}
         >
-          Place Order
+          {isSubmitting ? "Submitting..." : "Place Order"}
         </button>
       </div>
     </div>
