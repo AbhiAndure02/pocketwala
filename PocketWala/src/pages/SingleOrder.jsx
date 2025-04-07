@@ -84,6 +84,20 @@ function SingleOrder() {
               Price: <span className="text-3xl font-bold text-blue-900">₹120</span>
             </p>
           </div>
+          
+          <div className="mt-6">
+            <p className="font-semibold">Select Color:</p>
+            <div className="grid grid-cols-4 gap-3 mt-2">
+              {Object.keys(colorMap).map((color) => (
+                <button
+                  key={color}
+                  onClick={() => setSelectedColor(color)}
+                  className={`w-12 h-12 border rounded-full ${selectedColor === color ? "border-4 border-yellow-500" : ""}`}
+                  style={{ backgroundColor: colorMap[color] }}
+                ></button>
+              ))}
+            </div>
+          </div>
           <div className="mt-6">
             <p className="font-semibold">Select Size:</p>
             <div className="grid grid-cols-4 gap-3 mt-2">
@@ -95,19 +109,6 @@ function SingleOrder() {
                 >
                   {size}
                 </button>
-              ))}
-            </div>
-          </div>
-          <div className="mt-6">
-            <p className="font-semibold">Select Color:</p>
-            <div className="grid grid-cols-4 gap-3 mt-2">
-              {Object.keys(colorMap).map((color) => (
-                <button
-                  key={color}
-                  onClick={() => setSelectedColor(color)}
-                  className={`w-12 h-12 border rounded-full ${selectedColor === color ? "border-4 border-yellow-500" : ""}`}
-                  style={{ backgroundColor: colorMap[color] }}
-                ></button>
               ))}
             </div>
           </div>
