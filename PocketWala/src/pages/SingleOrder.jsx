@@ -7,7 +7,7 @@ import imgage3 from "../assets/frontA4.png";
 import image4 from "../assets/frontA3.png";
 import image5 from "../assets/backA4.png";
 import image6 from "../assets/backA3.png";
-import { Link } from "react-router-dom";
+
 
 function SingleOrder() {
   const [selectedSize, setSelectedSize] = useState("");
@@ -79,7 +79,7 @@ function SingleOrder() {
         <div className="p-6 max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center">Polyester Dryfit T-Shirt</h2>
           <div className="flex flex-col items-center mt-6">
-            <img src={uploadedImage || img} alt="T-shirt" className="w-full max-w-md h-auto border rounded-md" />
+            <img src={img} alt="T-shirt" className="w-full max-w-md h-auto border rounded-md" />
             <p className="text-lg font-semibold mt-4">
               Price: <span className="text-3xl font-bold text-blue-900">₹120</span>
             </p>

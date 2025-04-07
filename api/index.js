@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 import orderRoutes from "./routes/order.routes.js"; // ✅ Import Order Routes
+import SingleOrderRoutes from "./routes/singleOrder.routes.js"; // ✅ Import Single Order Routes
 import path from "path";
 
 dotenv.config();
@@ -23,6 +24,7 @@ mongoose
 
 // ✅ API Routes
 app.use("/api/orders", orderRoutes); // ✅ Correct placement for API routes
+app.use("/api/order", SingleOrderRoutes); //
 
 // ✅ Serve React App (Static Files)
 app.use(express.static(path.join(__dirname, "/PocketWala/dist")));
