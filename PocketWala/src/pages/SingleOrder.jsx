@@ -63,7 +63,7 @@ function SingleOrder() {
     };
 
     try {
-      const response = await axios.post("/api/orders", orderData);
+      const response = await axios.post("/api/order", orderData);
       alert("Order Submitted Successfully!");
       console.log(response.data);
     } catch (error) {
