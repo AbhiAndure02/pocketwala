@@ -10,7 +10,7 @@ const singleOrderSchema = new mongoose.Schema({
         required: true
     },
     placement:{
-        type: String,
+        type: Array,
         required: true
     },
     quantity:{
