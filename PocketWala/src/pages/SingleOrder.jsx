@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import axios from "axios";
 import img from "../assets/vithu.jpeg";
 import imgage1 from "../assets/left.png";
@@ -16,7 +16,7 @@ function SingleOrder() {
   const [quantity, setQuantity] = useState(1);
   const [uploadedImage, setUploadedImage] = useState(null);
   const fileInputRef = useRef(null);
-  const [images, setImages] = useState([null]); // Starts with one upload field
+  const [images, setImages] = useState([null]); 
 
   const handleImageChange = (e, index) => {
     const file = e.target.files[0];

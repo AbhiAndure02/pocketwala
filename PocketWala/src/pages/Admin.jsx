@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import AdminHeader from "../admin/AdminHeader";
 
 function Admin() {
   const [orders, setOrders] = useState([]);
@@ -21,7 +22,7 @@ function Admin() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h2 className="text-3xl font-bold text-center mb-6">Admin Order Management</h2>
+      <AdminHeader />
 
       {/* Loading State */}
       {loading && <p className="text-center text-lg">Loading Orders...</p>}

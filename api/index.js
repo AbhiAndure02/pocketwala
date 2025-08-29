@@ -5,6 +5,9 @@ import cors from "cors";
 import orderRoutes from "./routes/order.routes.js"; // ✅ Import Order Routes
 import SingleOrderRoutes from "./routes/singleOrder.routes.js"; // ✅ Import Single Order Routes
 import path from "path";
+import productRoutes from './routes/product.routes.js'; // Adjust the path if needed
+import userRoutes from './routes/user.routes.js'
+
 
 dotenv.config();
 
@@ -16,7 +19,7 @@ app.use(cors());
 app.use(express.json()); // Enables JSON request body parsing
 
 // ✅ MongoDB Connection (Make sure to use a database name)
-const MONGO_URI ="mongodb+srv://abhiandure123:abhishek@cluster0.oxo6h.mongodb.net/pocketwala?retryWrites=true&w=majority&appName=Cluster0";
+const MONGO_URI =process.env.MONGO_URI;
 mongoose
   .connect(MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected..."))
@@ -25,6 +28,9 @@ mongoose
 // ✅ API Routes
 app.use("/api/orders", orderRoutes); // ✅ Correct placement for API routes
 app.use("/api/order", SingleOrderRoutes); //
+app.use("/api/product", productRoutes)
+app.use("/api/users", userRoutes);
+
 
 // ✅ Serve React App (Static Files)
 app.use(express.static(path.join(__dirname, "/PocketWala/dist")));
@@ -40,5 +46,5 @@ app.get("/", (req, res) => {
 });
 
 // ✅ Start Server
-const PORT = 5000;
+const PORT =  process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
