@@ -1,4 +1,6 @@
 import { useState, useRef } from "react";
+import axios from "axios";
+import { uploadMultipleImages } from "../utils/firebaseStorage";
 
 const AddProductPage = () => {
   const [productData, setProductData] = useState({
@@ -14,6 +16,8 @@ const AddProductPage = () => {
 
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef(null);
 
   const handleInputChange = (e) => {
@@ -79,8 +83,10 @@ const AddProductPage = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setErrorMessage("");
 
     // Basic validation
     if (
@@ -92,31 +98,67 @@ const AddProductPage = () => {
         "Please fill in all required fields and upload at least one image"
       );
       setTimeout(() => setErrorMessage(""), 3000);
+      setIsSubmitting(false);
       return;
     }
 
-    // In a real application, you would send this data to your backend
-    console.log("Product data to be submitted:", productData);
+    try {
+      setUploadProgress(0);
+      
+      // Extract files from images array
+      const imageFiles = productData.images.map(img => img.file);
+      
+      // Upload images to Firebase Storage
+      const imageUrls = await uploadMultipleImages(imageFiles);
+      
+      setUploadProgress(100);
+      
+      // Prepare data for API submission
+      const productPayload = {
+        name: productData.name,
+        price: Number(productData.price),
+        category: productData.category,
+        type: productData.type,
+        description: productData.description,
+        sizes: productData.sizes,
+        colors: productData.colors,
+        images: imageUrls // Array of Firebase Storage URLs
+      };
 
-    // Show success message
-    setSuccessMessage("Product added successfully!");
-    setTimeout(() => setSuccessMessage(""), 3000);
+      // Send data to the API endpoint
+      const response = await axios.post("http://localhost:5050/api/product", productPayload);
 
-    // Reset form
-    setProductData({
-      name: "",
-      price: "",
-      category: "Women",
-      type: "common",
-      description: "",
-      images: [],
-      sizes: [],
-      colors: [],
-    });
+      // Show success message
+      setSuccessMessage("Product added successfully!");
+      setTimeout(() => setSuccessMessage(""), 3000);
 
-    // Clear file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      // Reset form
+      setProductData({
+        name: "",
+        price: "",
+        category: "Women",
+        type: "common",
+        description: "",
+        images: [],
+        sizes: [],
+        colors: [],
+      });
+
+      // Clear file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      
+      console.log("Product created:", response.data);
+    } catch (error) {
+      console.error("Error creating product:", error);
+      setErrorMessage(
+        error.response?.data?.message || "Failed to add product. Please try again."
+      );
+      setTimeout(() => setErrorMessage(""), 3000);
+    } finally {
+      setIsSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
@@ -176,6 +218,22 @@ const AddProductPage = () => {
                 />
               </svg>
               {errorMessage}
+            </div>
+          )}
+
+          {/* Upload Progress Bar */}
+          {isSubmitting && uploadProgress > 0 && uploadProgress < 100 && (
+            <div className="mb-6">
+              <div className="flex justify-between text-sm text-gray-600 mb-1">
+                <span>Uploading images...</span>
+                <span>{uploadProgress}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div 
+                  className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" 
+                  style={{ width: `${uploadProgress}%` }}
+                ></div>
+              </div>
             </div>
           )}
 
@@ -471,9 +529,12 @@ const AddProductPage = () => {
             <div className="mt-10 flex justify-center">
               <button
                 type="submit"
-                className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg shadow-md hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition transform hover:-translate-y-0.5"
+                disabled={isSubmitting}
+                className={`px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition transform ${
+                  isSubmitting ? "opacity-70 cursor-not-allowed" : "hover:from-indigo-700 hover:to-purple-700 hover:-translate-y-0.5"
+                }`}
               >
-                Add Product
+                {isSubmitting ? "Adding Product..." : "Add Product"}
               </button>
             </div>
           </form>

@@ -10,17 +10,20 @@ import Home from "./pages/Home";
 import AddProduct from "./admin/AddProduct";
 import ProductPage from "./pages/ProductPage";
 import CartPage from "./pages/MyCart";
-
+import Footer from "./components/Footer";
+import UserList from "./admin/UserList";
 const App = () => {
-   const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState([]);
 
   // Add product to cart or increase quantity if already added
   const addToCart = (product) => {
-    const exist = cart.find(item => item.id === product.id);
+    const exist = cart.find((item) => item.id === product.id);
     if (exist) {
       setCart(
-        cart.map(item =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        cart.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
         )
       );
     } else {
@@ -30,7 +33,7 @@ const App = () => {
 
   // Remove product from cart completely
   const removeFromCart = (productId) => {
-    setCart(cart.filter(item => item.id !== productId));
+    setCart(cart.filter((item) => item.id !== productId));
   };
 
   // Update product quantity
@@ -39,9 +42,9 @@ const App = () => {
       removeFromCart(productId);
       return;
     }
-    
+
     setCart(
-      cart.map(item =>
+      cart.map((item) =>
         item.id === productId ? { ...item, quantity: newQuantity } : item
       )
     );
@@ -52,33 +55,25 @@ const App = () => {
       <Routes>
         <Route path="/single-order" element={<SingleOrder />} />
         <Route path="/admin/products" element={<AddProduct />} />
-   <Route 
-            path="/" 
-            element={
-              <Home 
-                cart={cart} 
-                addToCart={addToCart} 
-              />
-            } 
-          />
-          <Route 
-            path="/cart" 
-            element={
-              <CartPage 
-                cart={cart} 
-                removeFromCart={removeFromCart} 
-                updateQuantity={updateQuantity} 
-              />
-            }
+        <Route path="/" element={<Home cart={cart} addToCart={addToCart} />} />
+        <Route
+          path="/cart"
+          element={
+            <CartPage
+              cart={cart}
+              removeFromCart={removeFromCart}
+              updateQuantity={updateQuantity}
             />
- <Route 
-            path="/order" 
-            element={<Order />} 
-          />        <Route path="/signin" element={<SignIn />} />
+          }
+        />
+        <Route path="/order" element={<Order />} />{" "}
+        <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/product/:slug" element={<ProductPage />} />
+        <Route path="/admin/users" element={<UserList />} />{" "}
         <Route path="/admin" element={<Admin />} />
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 };

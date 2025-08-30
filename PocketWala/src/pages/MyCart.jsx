@@ -1,11 +1,9 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 
 const CartPage = ({ cart, removeFromCart, updateQuantity }) => {
-  // Calculate total price
+
   const totalPrice = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
 
-  // Handle quantity changes
   const handleQuantityChange = (id, newQuantity) => {
     if (newQuantity < 1) return;
     updateQuantity(id, newQuantity);

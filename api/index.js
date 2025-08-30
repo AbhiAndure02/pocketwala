@@ -2,11 +2,10 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
-import orderRoutes from "./routes/order.routes.js"; // ✅ Import Order Routes
-import SingleOrderRoutes from "./routes/singleOrder.routes.js"; // ✅ Import Single Order Routes
 import path from "path";
 import productRoutes from './routes/product.routes.js'; // Adjust the path if needed
 import userRoutes from './routes/user.routes.js'
+import orderRooutes from './routes/order.routes.js'
 
 
 dotenv.config();
@@ -19,17 +18,16 @@ app.use(cors());
 app.use(express.json()); // Enables JSON request body parsing
 
 // ✅ MongoDB Connection (Make sure to use a database name)
-const MONGO_URI =process.env.MONGO_URI;
+const MONGO_URI = process.env.MONGO_URI;
 mongoose
   .connect(MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected..."))
   .catch((err) => console.log("❌ MongoDB Connection Error:", err));
 
 // ✅ API Routes
-app.use("/api/orders", orderRoutes); // ✅ Correct placement for API routes
-app.use("/api/order", SingleOrderRoutes); //
-app.use("/api/product", productRoutes)
+app.use("/api/product", productRoutes);
 app.use("/api/users", userRoutes);
+app.use('/api/order', orderRooutes);
 
 
 // ✅ Serve React App (Static Files)

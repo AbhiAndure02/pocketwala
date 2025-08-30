@@ -28,10 +28,9 @@ const userSchema = new mongoose.Schema(
       country: String,
       pincode: String,
     },
-    role: {
-      type: String,
-      enum: ["customer", "admin"],
-      default: "customer",
+    isAdmin: {
+        type: Boolean,
+        default: false,
     },
     cart: [
       {
