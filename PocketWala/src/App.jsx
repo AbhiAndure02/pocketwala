@@ -66,7 +66,7 @@ const App = () => {
             />
           }
         />
-        <Route path="/order" element={<Order />} />{" "}
+        <Route path="/order/:id" element={<Order />} />{" "}
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/product/:id" element={<ProductPage />} />

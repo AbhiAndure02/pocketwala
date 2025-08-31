@@ -6,7 +6,8 @@ import {
   getAllUsers,
   getUserById,
   google,
-  updateUserProfile
+  updateUserProfile,
+  logoutUser
 } from "../controllers/user.controller.js";
 
 import { protect } from "../middleware/authMiddleware.js";
@@ -28,6 +29,7 @@ router.get("/", getAllUsers);
 // ✅ Get user by id (admin or self)
 router.get("/:id", getUserById);
 router.post('/google', google);
-router.put("/profile", protect, updateUserProfile);
+router.put("/profile", updateUserProfile);
+router.post("/logout", logoutUser)
 
 export default router;

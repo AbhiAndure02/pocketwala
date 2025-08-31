@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import OAuth from './OAuth';
+import { useDispatch } from 'react-redux';
+import { signInStart, signInSuccess, signInFailure } from '../redux/user/userSlice';
 
 const SignIn = () => {
   const [loginData, setLoginData] = useState({
@@ -13,6 +15,7 @@ const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   const navigate = useNavigate();
+  const dispatch = useDispatch(); // Initialize dispatch
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -26,10 +29,12 @@ const SignIn = () => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMessage('');
+    dispatch(signInStart()); // Dispatch start action
 
     // Basic validation
     if (!loginData.login || !loginData.password) {
       setErrorMessage('Please enter your email/phone and password');
+      dispatch(signInFailure('Please enter your email/phone and password'));
       setIsLoading(false);
       return;
     }
@@ -38,28 +43,24 @@ const SignIn = () => {
       const response = await axios.post('/api/users/login', loginData);
       
       if (response.status === 200) {
-        // Save user data and token (adjust based on your API response)
         localStorage.setItem('user', JSON.stringify(response.data.user));
         localStorage.setItem('token', response.data.token);
+        
+        // Dispatch success action with user data
+        dispatch(signInSuccess(response.data.user));
         
         // Redirect to home page or dashboard
         navigate('/');
       }
     } catch (error) {
       console.error('Login error:', error);
-      setErrorMessage(
-        error.response?.data?.message || 
-        'Login failed. Please check your credentials and try again.'
-      );
+      const errorMsg = error.response?.data?.message || 
+        'Login failed. Please check your credentials and try again.';
+      setErrorMessage(errorMsg);
+      dispatch(signInFailure(errorMsg)); // Dispatch failure action
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Google OAuth handler (you'll need to implement the backend for this)
-  const handleGoogleLogin = () => {
-    // Redirect to your backend Google OAuth endpoint
-    window.location.href = '/api/auth/google';
   };
 
   return (
@@ -81,7 +82,6 @@ const SignIn = () => {
         
         {/* Google Sign In Button */}
         <div className='flex'>
-
           <OAuth />
         </div>
         

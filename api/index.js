@@ -6,6 +6,7 @@ import path from "path";
 import productRoutes from './routes/product.routes.js'; // Adjust the path if needed
 import userRoutes from './routes/user.routes.js'
 import orderRooutes from './routes/order.routes.js'
+import cartRoutes from './routes/cart.routes.js'
 
 
 dotenv.config();
@@ -28,6 +29,7 @@ mongoose
 app.use("/api/product", productRoutes);
 app.use("/api/users", userRoutes);
 app.use('/api/order', orderRooutes);
+app.use('/api/cart', cartRoutes)
 
 
 // ✅ Serve React App (Static Files)

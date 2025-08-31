@@ -183,3 +183,14 @@ export const google = async (req, res) => {
     res.status(500).json({ message: "Google auth failed" });
   }
 };
+
+// Logout User
+export const logoutUser = async (req, res) => {
+   try {
+        res.clearCookie('access_token').status(200).json('user has been sign out');
+        
+    } catch (error) {
+        next(error)
+        
+    }
+  }
