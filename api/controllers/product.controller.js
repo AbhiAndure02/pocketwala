@@ -12,10 +12,6 @@ export const addProduct = async (req, res) => {
     }
 };
 
-// @desc   Get all products
-// @route  GET /products
-// @desc   Get all products (latest first)
-// @route  GET /products
 export const getAllProducts = async (req, res) => {
     try {
         const products = await Product.find().sort({ createdAt: -1 }); // Latest first

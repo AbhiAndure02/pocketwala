@@ -4,7 +4,9 @@ const productTypeSchema = new mongoose.Schema({
     type:{
         type:String,
         require: true
-}
+},
+
+
 },
 {
         timestamps: true // adds createdAt and updatedAt fields

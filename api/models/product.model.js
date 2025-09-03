@@ -33,6 +33,14 @@ const productSchema = new mongoose.Schema({
     colors: {
         type: [String], 
         default: []
+    },
+    isCustomizable:{
+        type:Boolean,
+        default:false
+    },
+    stock: {
+        type: Number,
+        default:1
     }
 }, {
     timestamps: true // adds createdAt and updatedAt fields

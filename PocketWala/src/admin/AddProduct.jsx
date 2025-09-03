@@ -12,24 +12,27 @@ const AddProductPage = () => {
     images: [],
     sizes: [],
     colors: [],
+    isCustomizable: false,
+    stock: 0
   });
 
   const [productTypes, setProductTypes] = useState([]);
+  const [colorOptions, setColorOptions] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef(null);
 
-  // Fetch product types from backend
+  // Fetch product types and colors from backend
   useEffect(() => {
-    const fetchProductTypes = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get("/api/product-types");
-        // Handle different response formats
-        const typesData = Array.isArray(response.data) 
-          ? response.data 
-          : response.data.data || [];
+        // Fetch product types
+        const typesResponse = await axios.get("/api/product-types");
+        const typesData = Array.isArray(typesResponse.data) 
+          ? typesResponse.data 
+          : typesResponse.data.data || [];
         
         setProductTypes(typesData);
         
@@ -40,21 +43,29 @@ const AddProductPage = () => {
             type: typesData[0].type
           }));
         }
+
+        // Fetch product colors
+        const colorsResponse = await axios.get("/api/product-colors");
+        const colorsData = Array.isArray(colorsResponse.data) 
+          ? colorsResponse.data 
+          : colorsResponse.data.data || [];
+        
+        setColorOptions(colorsData);
       } catch (error) {
-        console.error("Error fetching product types:", error);
-        setErrorMessage("Failed to load product types");
+        console.error("Error fetching data:", error);
+        setErrorMessage("Failed to load product data");
         setTimeout(() => setErrorMessage(""), 3000);
       }
     };
 
-    fetchProductTypes();
+    fetchData();
   }, []);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setProductData({
       ...productData,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     });
   };
 
@@ -69,10 +80,10 @@ const AddProductPage = () => {
     });
   };
 
-  const handleColorChange = (color) => {
-    const updatedColors = productData.colors.includes(color)
-      ? productData.colors.filter((c) => c !== color)
-      : [...productData.colors, color];
+  const handleColorChange = (colorId) => {
+    const updatedColors = productData.colors.includes(colorId)
+      ? productData.colors.filter((c) => c !== colorId)
+      : [...productData.colors, colorId];
 
     setProductData({
       ...productData,
@@ -153,7 +164,9 @@ const AddProductPage = () => {
         description: productData.description,
         sizes: productData.sizes,
         colors: productData.colors,
-        images: imageUrls // Array of Firebase Storage URLs
+        images: imageUrls, // Array of Firebase Storage URLs
+        isCustomizable: productData.isCustomizable,
+        stock: Number(productData.stock)
       };
 
       // Send data to the API endpoint
@@ -173,6 +186,8 @@ const AddProductPage = () => {
         images: [],
         sizes: [],
         colors: [],
+        isCustomizable: false,
+        stock: 0
       });
 
       // Clear file input
@@ -194,16 +209,6 @@ const AddProductPage = () => {
   };
 
   const sizeOptions = ["XS", "S", "M", "L", "XL", "XXL"];
-  const colorOptions = [
-    "Black",
-    "White",
-    "Gray",
-    "Navy",
-    "Red",
-    "Green",
-    "Yellow",
-    "Pink",
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 py-8">
@@ -305,6 +310,22 @@ const AddProductPage = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Stock Quantity *
+                  </label>
+                  <input
+                    type="number"
+                    name="stock"
+                    value={productData.stock}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                    placeholder="e.g., 100"
+                    min="0"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Category *
                   </label>
                   <select
@@ -338,6 +359,23 @@ const AddProductPage = () => {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="isCustomizable"
+                    name="isCustomizable"
+                    checked={productData.isCustomizable}
+                    onChange={handleInputChange}
+                    className="h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  />
+                  <label
+                    htmlFor="isCustomizable"
+                    className="ml-2 text-sm text-gray-700"
+                  >
+                    Is Customizable
+                  </label>
                 </div>
               </div>
 
@@ -474,19 +512,23 @@ const AddProductPage = () => {
               </label>
               <div className="flex flex-wrap gap-3">
                 {colorOptions.map((color) => (
-                  <div key={color} className="flex items-center">
+                  <div key={color._id} className="flex items-center">
                     <input
                       type="checkbox"
-                      id={`color-${color}`}
-                      checked={productData.colors.includes(color)}
-                      onChange={() => handleColorChange(color)}
+                      id={`color-${color._id}`}
+                      checked={productData.colors.includes(color._id)}
+                      onChange={() => handleColorChange(color._id)}
                       className="h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                     />
                     <label
-                      htmlFor={`color-${color}`}
-                      className="ml-2 text-sm text-gray-700"
+                      htmlFor={`color-${color._id}`}
+                      className="ml-2 text-sm text-gray-700 flex items-center"
                     >
-                      {color}
+                      <span 
+                        className="w-4 h-4 rounded-full mr-2 border border-gray-300"
+                        style={{ backgroundColor: color.hexCode }}
+                      ></span>
+                      {color.name}
                     </label>
                   </div>
                 ))}
@@ -526,9 +568,17 @@ const AddProductPage = () => {
                       <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded ml-2">
                         {productData.type || "No type selected"}
                       </span>
+                      {productData.isCustomizable && (
+                        <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded ml-2">
+                          Customizable
+                        </span>
+                      )}
                     </div>
                     <p className="text-2xl font-bold text-indigo-600 mt-3">
                       {productData.price ? `₹${productData.price}` : "Price"}
+                    </p>
+                    <p className="text-gray-600 mt-1">
+                      Stock: {productData.stock || 0}
                     </p>
                     <p className="text-gray-700 mt-4">
                       {productData.description ||
@@ -545,14 +595,21 @@ const AddProductPage = () => {
                       ))}
                     </div>
                     <div className="mt-4 flex flex-wrap gap-2">
-                      {productData.colors.map((color) => (
-                        <span
-                          key={color}
-                          className="px-3 py-1 bg-gray-200 text-sm rounded-full"
-                        >
-                          {color}
-                        </span>
-                      ))}
+                      {productData.colors.map((colorId) => {
+                        const color = colorOptions.find(c => c._id === colorId);
+                        return color ? (
+                          <span
+                            key={colorId}
+                            className="px-3 py-1 bg-gray-200 text-sm rounded-full flex items-center"
+                          >
+                            <span 
+                              className="w-3 h-3 rounded-full mr-1"
+                              style={{ backgroundColor: color.hexCode }}
+                            ></span>
+                            {color.name}
+                          </span>
+                        ) : null;
+                      })}
                     </div>
                   </div>
                 </div>
