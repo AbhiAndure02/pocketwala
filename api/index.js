@@ -8,7 +8,7 @@ import userRoutes from './routes/user.routes.js'
 import orderRooutes from './routes/order.routes.js'
 import cartRoutes from './routes/cart.routes.js'
 import bulkOrderroutes from './routes/bulkOrder.routes.js'
-
+import productTypeRoutes from './routes/productType.routes.js'
 
 dotenv.config();
 
@@ -32,6 +32,7 @@ app.use("/api/users", userRoutes);
 app.use('/api/order', orderRooutes);
 app.use('/api/cart', cartRoutes)
 app.use('/api/bulk-order', bulkOrderroutes)
+app.use('/api', productTypeRoutes)
 
 
 // ✅ Serve React App (Static Files)

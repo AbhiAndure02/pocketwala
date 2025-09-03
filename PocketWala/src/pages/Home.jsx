@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 
 const Home = ({ addToCart }) => {
   const [products, setProducts] = useState([]);
+  const [productTypes, setProductTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
@@ -12,22 +13,34 @@ const Home = ({ addToCart }) => {
   const { currentUser } = useSelector((state) => state.user);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("/api/product");
-        setProducts(response.data);
+        
+        // Fetch products
+        const productsResponse = await axios.get("/api/product");
+        setProducts(productsResponse.data);
+        
+        // Fetch product types
+        const typesResponse = await axios.get("/api/product-types");
+        // Handle different response formats
+        const typesData = Array.isArray(typesResponse.data) 
+          ? typesResponse.data 
+          : typesResponse.data.data || [];
+        
+        setProductTypes(typesData);
         setError(null);
       } catch (err) {
-        console.error("Error fetching products:", err);
-        setError("Failed to load products. Please try again later.");
+        console.error("Error fetching data:", err);
+        setError("Failed to load data. Please try again later.");
         setProducts([]);
+        setProductTypes([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
+    fetchData();
   }, []);
 
   // ✅ Fixed: send proper body to backend
@@ -99,25 +112,37 @@ const Home = ({ addToCart }) => {
         <h2 className="text-3xl font-bold text-center mb-8">
           Explore Our T-Shirt Collections
         </h2>
+        
+        {/* Product Type Tabs */}
         <div className="flex justify-center mb-12">
           <div className="flex flex-wrap justify-center gap-2 bg-white p-2 rounded-xl shadow-md">
-            {["all", "common", "limited", "premium", "plain", "customize"].map(
-              (type) => (
-                <button
-                  key={type}
-                  onClick={() => setActiveTab(type)}
-                  className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
-                    activeTab === type
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                  }`}
-                >
-                  {type === "all"
-                    ? "All T-Shirts"
-                    : `${type.charAt(0).toUpperCase() + type.slice(1)} T-Shirts`}
-                </button>
-              )
-            )}
+            {/* All Products Tab */}
+            <button
+              key="all"
+              onClick={() => setActiveTab("all")}
+              className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+                activeTab === "all"
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+              }`}
+            >
+              All T-Shirts
+            </button>
+            
+            {/* Dynamic Product Type Tabs */}
+            {productTypes.map((type) => (
+              <button
+                key={type._id}
+                onClick={() => setActiveTab(type.type)}
+                className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+                  activeTab === type.type
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                }`}
+              >
+                {type.type.charAt(0).toUpperCase() + type.type.slice(1)} T-Shirts
+              </button>
+            ))}
           </div>
         </div>
 
@@ -125,7 +150,7 @@ const Home = ({ addToCart }) => {
         {filteredProducts.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600 text-lg">
-              No products found in this category.
+              No products found {activeTab !== "all" ? `in ${activeTab} category` : ""}.
             </p>
           </div>
         ) : (
@@ -139,15 +164,18 @@ const Home = ({ addToCart }) => {
                   <div className="relative overflow-hidden">
                     <img
                       src={
-                        product.images[0] ||
-                        "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                        product.images && product.images[0]
+                          ? product.images[0]
+                          : "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
                       }
                       alt={product.name}
                       className="w-full h-60 object-cover"
                     />
-                    <span className="absolute top-4 left-4 bg-blue-600 text-white text-xs px-2 py-1 rounded">
-                      {product.category}
-                    </span>
+                    {product.category && (
+                      <span className="absolute top-4 left-4 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                        {product.category}
+                      </span>
+                    )}
                   </div>
                 </Link>
                 <div className="p-4">
@@ -157,6 +185,11 @@ const Home = ({ addToCart }) => {
                     </h3>
                   </Link>
                   <p className="text-blue-600 font-bold">₹{product.price}</p>
+                  {product.type && (
+                    <p className="text-gray-500 text-sm mt-1">
+                      Type: {product.type}
+                    </p>
+                  )}
                   <div className="flex flex-col gap-2 mt-4">
                     <button
                       className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
@@ -164,8 +197,8 @@ const Home = ({ addToCart }) => {
                     >
                       Add to Cart
                     </button>
-                    <button>
-                      <Link to={`/order/${product._id }`}>Bulk Order</Link>
+                    <button className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition">
+                      <Link to={`/order/${product._id}`}>Bulk Order</Link>
                     </button>
                   </div>
                 </div>

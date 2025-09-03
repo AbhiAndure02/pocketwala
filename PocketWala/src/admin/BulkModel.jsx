@@ -41,6 +41,12 @@ function BulkModel() {
     );
   }
 
+  // Helper function to safely get a substring
+  const safeSubstring = (value, length = 8) => {
+    if (!value) return 'N/A';
+    return value.length > length ? `${value.substring(0, length)}...` : value;
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6 text-gray-800">Bulk Orders</h1>
@@ -75,47 +81,54 @@ function BulkModel() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {orders.map((order) => (
-                <tr key={order._id} className="hover:bg-gray-50">
+                <tr key={order._id || Math.random()} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {order._id.substring(0, 8)}...
+                    {safeSubstring(order._id)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {order.userId.substring(0, 8)}...
+                    {safeSubstring(order.userId)}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
                     <div className="space-y-2">
-                      {order.items.map((item, index) => (
+                      {order.items && order.items.map((item, index) => (
                         <div key={index} className="border-b border-gray-100 pb-1 last:border-0 last:pb-0">
                           <div className="flex items-center">
-                            <span className="inline-block h-4 w-4 rounded-full mr-2" style={{backgroundColor: item.color.toLowerCase() === 'white' ? '#e5e7eb' : item.color.toLowerCase()}}></span>
-                            {item.quantity} × {item.color} ({item.size}) - ${item.price}
+                            <span className="inline-block h-4 w-4 rounded-full mr-2" style={{backgroundColor: item.color && item.color.toLowerCase() === 'white' ? '#e5e7eb' : item.color || '#ccc'}}></span>
+                            {item.quantity || 0} × {item.color || 'N/A'} ({item.size || 'N/A'}) - ${item.price || 0}
                           </div>
-                          <div className="text-xs text-gray-400 ml-6">Placement: {item.placement}</div>
+                          <div className="text-xs text-gray-400 ml-6">Placement: {item.placement || 'N/A'}</div>
                         </div>
                       ))}
+                      {(!order.items || order.items.length === 0) && 'No items'}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <img 
-                      src={order.designImage} 
-                      alt="Design" 
-                      className="h-16 w-16 object-cover rounded border border-gray-200 cursor-pointer"
-                      onClick={() => window.open(order.designImage, '_blank')}
-                    />
+                    {order.designImage ? (
+                      <img 
+                        src={order.designImage} 
+                        alt="Design" 
+                        className="h-16 w-16 object-cover rounded border border-gray-200 cursor-pointer"
+                        onClick={() => window.open(order.designImage, '_blank')}
+                      />
+                    ) : (
+                      <div className="h-16 w-16 flex items-center justify-center bg-gray-100 rounded border border-gray-200 text-xs text-gray-400">
+                        No Image
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ${order.totalPrice}
+                    ${order.totalPrice || 0}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                       ${order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 
                         order.status === 'Completed' ? 'bg-green-100 text-green-800' : 
                         'bg-blue-100 text-blue-800'}`}>
-                      {order.status}
+                      {order.status || 'Unknown'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(order.createdAt).toLocaleDateString()}
+                    {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
                   </td>
                 </tr>
               ))}

@@ -32,7 +32,7 @@ const ProductPage = ({ addToCart }) => {
     fetchProduct();
   }, [id]);
 
-  const handleAddToCart = async (product) => {
+  const handleAddToCart = async () => {
     try {
       if (!currentUser) {
         alert("Please log in to add items to cart.");
@@ -58,6 +58,38 @@ const ProductPage = ({ addToCart }) => {
       alert("Failed to add item to cart. Please try again.");
     }
   };
+
+  // Function to get color class based on color name
+  const getColorClass = (color) => {
+    const colorMap = {
+      black: 'bg-black',
+      white: 'bg-white border border-gray-300',
+      gray: 'bg-gray-400',
+      navy: 'bg-blue-900',
+      red: 'bg-red-600',
+      green: 'bg-green-600',
+      yellow: 'bg-yellow-400',
+      pink: 'bg-pink-400',
+      blue: 'bg-blue-600',
+      purple: 'bg-purple-600',
+      orange: 'bg-orange-500',
+      brown: 'bg-amber-800',
+      teal: 'bg-teal-500',
+      cyan: 'bg-cyan-400',
+      lime: 'bg-lime-400',
+      indigo: 'bg-indigo-600',
+      maroon: 'bg-red-800',
+      olive: 'bg-yellow-800',
+      // Add more colors as needed
+    };
+    
+    // Convert to lowercase and remove spaces for matching
+    const normalizedColor = color.toLowerCase().replace(/\s+/g, '');
+    
+    // Return the matching class or a default
+    return colorMap[normalizedColor] || 'bg-gray-200';
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
@@ -203,19 +235,23 @@ const ProductPage = ({ addToCart }) => {
               {product.colors && product.colors.length > 0 && (
                 <div className="mt-6">
                   <h3 className="text-sm font-medium text-gray-900">Color</h3>
-                  <div className="mt-2 flex flex-wrap gap-2">
+                  <div className="mt-3 grid grid-cols-4 sm:grid-cols-6 gap-3">
                     {product.colors.map(color => (
-                      <button
-                        key={color}
-                        onClick={() => setSelectedColor(color)}
-                        className={`px-4 py-2 text-sm font-medium rounded-md ${
-                          selectedColor === color
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                        }`}
-                      >
-                        {color}
-                      </button>
+                      <div key={color} className="flex flex-col items-center">
+                        <button
+                          onClick={() => setSelectedColor(color)}
+                          className={`w-10 h-10 rounded-full ${getColorClass(color)} ${
+                            selectedColor === color ? 'ring-2 ring-offset-2 ring-blue-500' : ''
+                          }`}
+                          title={color}
+                          aria-label={`Select ${color} color`}
+                        >
+                          {/* Color box - the color is applied via the class */}
+                        </button>
+                        <span className="text-xs text-gray-600 mt-1 truncate w-full text-center">
+                          {color}
+                        </span>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -229,7 +265,7 @@ const ProductPage = ({ addToCart }) => {
                   Add to Cart
                 </button>
                 <button className="px-6 py-3 bg-gray-200 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-300 transition-colors">
-                 <Link to ={`/order/${product._id}`} >order in bulk</Link> 
+                  <Link to={`/order/${product._id}`}>Order in Bulk</Link> 
                 </button>
               </div>
               
@@ -253,6 +289,12 @@ const ProductPage = ({ addToCart }) => {
                     <div className="flex">
                       <span className="w-24 font-medium">Care:</span>
                       <span>{product.care}</span>
+                    </div>
+                  )}
+                  {product.type && (
+                    <div className="flex">
+                      <span className="w-24 font-medium">Type:</span>
+                      <span className="capitalize">{product.type}</span>
                     </div>
                   )}
                 </div>

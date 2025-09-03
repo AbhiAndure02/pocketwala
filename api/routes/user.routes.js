@@ -10,7 +10,6 @@ import {
   logoutUser
 } from "../controllers/user.controller.js";
 
-import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 

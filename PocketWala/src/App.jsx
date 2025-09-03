@@ -16,6 +16,7 @@ import UserList from "./admin/UserList";
 import Profile from "./pages/Profle";
 import BulkModel from "./admin/BulkModel";
 import OrderAdmin from "./admin/Order";
+import ProductType from "./admin/ProductType";
 
 // Create a wrapper component to conditionally render headers
 const HeaderSelector = ({ cart }) => {
@@ -91,6 +92,7 @@ const App = () => {
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/bulk-orders" element={<BulkModel />} />
         <Route path="/admin/orders" element={<OrderAdmin />} />
+        <Route path ="/admin/product-type" element = {<ProductType />} />
         <Route path="/profile" element={<Profile />} />
       </Routes>
       <Footer />

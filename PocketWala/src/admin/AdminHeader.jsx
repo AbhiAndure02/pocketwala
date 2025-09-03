@@ -13,6 +13,7 @@ const AdminHeader = () => {
 
     { name: 'Products', path: '/admin/products', icon: '👕' },
     { name: 'Users', path: '/admin/users', icon: '👥' },
+    {name: 'Product type', path:'/admin/product-type', icon: '👕'  }
   ];
 
   return (

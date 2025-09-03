@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { uploadMultipleImages } from "../utils/firebaseStorage";
 
@@ -7,18 +7,48 @@ const AddProductPage = () => {
     name: "",
     price: "",
     category: "Women",
-    type: "common",
+    type: "",
     description: "",
     images: [],
     sizes: [],
     colors: [],
   });
 
+  const [productTypes, setProductTypes] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef(null);
+
+  // Fetch product types from backend
+  useEffect(() => {
+    const fetchProductTypes = async () => {
+      try {
+        const response = await axios.get("/api/product-types");
+        // Handle different response formats
+        const typesData = Array.isArray(response.data) 
+          ? response.data 
+          : response.data.data || [];
+        
+        setProductTypes(typesData);
+        
+        // Set default type if types exist
+        if (typesData.length > 0 && !productData.type) {
+          setProductData(prev => ({
+            ...prev,
+            type: typesData[0].type
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching product types:", error);
+        setErrorMessage("Failed to load product types");
+        setTimeout(() => setErrorMessage(""), 3000);
+      }
+    };
+
+    fetchProductTypes();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -92,6 +122,7 @@ const AddProductPage = () => {
     if (
       !productData.name ||
       !productData.price ||
+      !productData.type ||
       productData.images.length === 0
     ) {
       setErrorMessage(
@@ -126,7 +157,7 @@ const AddProductPage = () => {
       };
 
       // Send data to the API endpoint
-      const response = await axios.post("http://localhost:5050/api/product", productPayload);
+      const response = await axios.post("/api/product", productPayload);
 
       // Show success message
       setSuccessMessage("Product added successfully!");
@@ -137,7 +168,7 @@ const AddProductPage = () => {
         name: "",
         price: "",
         category: "Women",
-        type: "common",
+        type: productTypes.length > 0 ? productTypes[0].type : "",
         description: "",
         images: [],
         sizes: [],
@@ -298,11 +329,14 @@ const AddProductPage = () => {
                     value={productData.type}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                    required
                   >
-                    <option value="common">Common</option>
-                    <option value="limited">Seasonal Edition</option>
-                    <option value="premium">Customize</option>
-                    <option value="premium">Plain</option>
+                    <option value="">Select a type</option>
+                    {productTypes.map((type) => (
+                      <option key={type._id} value={type.type}>
+                        {type.type.charAt(0).toUpperCase() + type.type.slice(1)}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -490,7 +524,7 @@ const AddProductPage = () => {
                         {productData.category}
                       </span>
                       <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded ml-2">
-                        {productData.type}
+                        {productData.type || "No type selected"}
                       </span>
                     </div>
                     <p className="text-2xl font-bold text-indigo-600 mt-3">
