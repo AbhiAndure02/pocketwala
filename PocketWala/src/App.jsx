@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import Order from "./pages/Order";
 import Admin from "./pages/Admin";
 import Header from "./components/Header";
+import AdminHeader from "./admin/AdminHeader"; // You'll need to create this
 import SingleOrder from "./pages/SingleOrder";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
@@ -13,6 +14,17 @@ import CartPage from "./pages/MyCart";
 import Footer from "./components/Footer";
 import UserList from "./admin/UserList";
 import Profile from "./pages/Profle";
+import BulkModel from "./admin/BulkModel";
+import OrderAdmin from "./admin/Order";
+
+// Create a wrapper component to conditionally render headers
+const HeaderSelector = ({ cart }) => {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  
+  return isAdminRoute ? <AdminHeader /> : <Header cart={cart} />;
+};
+
 const App = () => {
   const [cart, setCart] = useState([]);
 
@@ -50,13 +62,17 @@ const App = () => {
       )
     );
   };
+
   return (
     <BrowserRouter>
-      <Header />
+      <HeaderSelector cart={cart} />
       <Routes>
         <Route path="/single-order" element={<SingleOrder />} />
         <Route path="/admin/products" element={<AddProduct />} />
-        <Route path="/" element={<Home cart={cart} addToCart={addToCart} />} />
+        <Route
+          path="/"
+          element={<Home cart={cart} addToCart={addToCart} />}
+        />
         <Route
           path="/cart"
           element={
@@ -67,14 +83,15 @@ const App = () => {
             />
           }
         />
-        <Route path="/order/:id" element={<Order />} />{" "}
+        <Route path="/order/:id" element={<Order />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/product/:id" element={<ProductPage />} />
-        <Route path="/admin/users" element={<UserList />} />{" "}
+        <Route path="/admin/users" element={<UserList />} />
         <Route path="/admin" element={<Admin />} />
-                <Route path="/profile" element={<Profile />} />
-
+        <Route path="/admin/bulk-orders" element={<BulkModel />} />
+        <Route path="/admin/orders" element={<OrderAdmin />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
       <Footer />
     </BrowserRouter>

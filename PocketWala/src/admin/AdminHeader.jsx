@@ -9,9 +9,10 @@ const AdminHeader = () => {
   const adminMenuItems = [
     { name: 'Dashboard', path: '/admin', icon: '📊' },
     { name: 'Orders', path: '/admin/orders', icon: '📦' },
+        { name: 'Bulk Orders', path: '/admin/bulk-orders', icon: '📦' },
+
     { name: 'Products', path: '/admin/products', icon: '👕' },
     { name: 'Users', path: '/admin/users', icon: '👥' },
-    { name: 'Analytics', path: '/admin/analytics', icon: '📈' },
   ];
 
   return (

@@ -12,21 +12,21 @@ import { protect } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 // Create order
-router.post("/", protect, addOrder);
+router.post("/", addOrder);
 
 // My orders
-router.get("/myorders", protect, getMyOrders);
+router.get("/myorders",  getMyOrders);
 
 // Get order by id
-router.get("/:id", protect, getOrderById);
+router.get("/:id",  getOrderById);
 
 // Update to paid
-router.put("/:id/pay", protect, updateOrderToPaid);
+router.put("/:id/pay",  updateOrderToPaid);
 
 // Update to delivered
-router.put("/:id/deliver", protect, updateOrderToDelivered);
+router.put("/:id/deliver",  updateOrderToDelivered);
 
 // Admin: get all orders
-router.get("/", protect, getAllOrders);
+router.get("/", getAllOrders);
 
 export default router;

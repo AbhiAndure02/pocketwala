@@ -1,14 +1,27 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const MyCart = () => {
   const [cart, setCart] = useState(null);
   const [products, setProducts] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [processingOrder, setProcessingOrder] = useState(false);
+  const [showCheckoutForm, setShowCheckoutForm] = useState(false);
   const { currentUser } = useSelector((state) => state.user);
+  const navigate = useNavigate();
+
+  // Form state
+  const [formData, setFormData] = useState({
+    user:"",
+    address: "",
+    city: "",
+    postalCode: "",
+    country: "",
+    paymentMethod: "credit_card"
+  });
 
   // Fetch cart data
   useEffect(() => {
@@ -65,7 +78,7 @@ const MyCart = () => {
   // Remove item
   const removeItem = async (productId) => {
     try {
-      const res = await axios.delete(`/api/cart/remove/${cart._id}/${productId}`);
+      const res = await axios.delete(`/api/cart/${cart._id}`);
       setCart(res.data);
       
       // Remove product from local state
@@ -75,6 +88,64 @@ const MyCart = () => {
     } catch (err) {
       console.error("Error removing item", err);
       alert("Failed to remove item");
+    }
+  };
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+
+  // Create order
+  const createOrder = async () => {
+    if (!cart || cart.items.length === 0) return;
+    
+    // Validate form
+    if (!formData.address || !formData.city || !formData.postalCode || !formData.country) {
+      alert("Please fill in all required shipping information");
+      return;
+    }
+    
+    setProcessingOrder(true);
+    try {
+      // Prepare order data according to your schema
+      const orderData = {
+        user: currentUser._id,
+        orderItems: cart.items.map(item => {
+          const product = products[item.productId];
+          return {
+            product: item.productId,
+            name: product.name,
+            qty: item.quantity,
+            price: product.price
+          };
+        }),
+        shippingAddress: {
+          address: formData.address,
+          city: formData.city,
+          postalCode: formData.postalCode,
+          country: formData.country
+        },
+        paymentMethod: formData.paymentMethod,
+        totalPrice: cart.totalPrice + (cart.totalPrice > 999 ? 0 : 99)
+      };
+
+      const res = await axios.post("/api/order", orderData);
+      
+      // Clear cart after successful order creation
+      await axios.delete(`/api/cart/${cart._id}`);
+      
+      // Redirect to order confirmation page
+      navigate(`/order/${res.data._id}`);
+    } catch (err) {
+      console.error("Error creating order", err);
+      alert("Failed to create order. Please try again.");
+    } finally {
+      setProcessingOrder(false);
     }
   };
 
@@ -207,10 +278,100 @@ const MyCart = () => {
             </div>
           </div>
 
-          {/* Checkout Button */}
-          <button className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium">
-            Proceed to Checkout
-          </button>
+          {/* Checkout Button - Shows form or processes order */}
+          {!showCheckoutForm ? (
+            <button 
+              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium"
+              onClick={() => setShowCheckoutForm(true)}
+            >
+              Proceed to Checkout
+            </button>
+          ) : (
+            <div className="mt-6 border-t pt-6">
+              <h3 className="text-xl font-bold mb-4">Shipping Information</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
+                  <input
+                    type="text"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Postal Code *</label>
+                  <input
+                    type="text"
+                    name="postalCode"
+                    value={formData.postalCode}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Country *</label>
+                  <input
+                    type="text"
+                    name="country"
+                    value={formData.country}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method *</label>
+                <select
+                  name="paymentMethod"
+                  value={formData.paymentMethod}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="credit_card">Credit Card</option>
+                  <option value="debit_card">Debit Card</option>
+                  <option value="paypal">PayPal</option>
+                  <option value="cash_on_delivery">Cash on Delivery</option>
+                </select>
+              </div>
+              
+              <div className="flex space-x-4">
+                <button 
+                  className="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400 transition font-medium"
+                  onClick={() => setShowCheckoutForm(false)}
+                >
+                  Back to Cart
+                </button>
+                <button 
+                  className={`flex-1 ${processingOrder ? 'bg-blue-400' : 'bg-blue-600'} text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium`}
+                  onClick={createOrder}
+                  disabled={processingOrder}
+                >
+                  {processingOrder ? 'Processing...' : 'Place Order'}
+                </button>
+              </div>
+            </div>
+          )}
           
           <div className="text-center mt-4">
             <Link 

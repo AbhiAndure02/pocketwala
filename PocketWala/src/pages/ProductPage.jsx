@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 const ProductPage = ({ addToCart }) => {
   const { id } = useParams();
@@ -10,6 +11,7 @@ const ProductPage = ({ addToCart }) => {
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [selectedImage, setSelectedImage] = useState(0);
+  const { currentUser } = useSelector((state) => state.user);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -30,26 +32,32 @@ const ProductPage = ({ addToCart }) => {
     fetchProduct();
   }, [id]);
 
-  const handleAddToCart = () => {
-    if (!selectedSize && product.sizes && product.sizes.length > 0) {
-      alert('Please select a size');
-      return;
-    }
-    
-    if (!selectedColor && product.colors && product.colors.length > 0) {
-      alert('Please select a color');
-      return;
-    }
-    
-    addToCart({
-      ...product,
-      id: product._id,
-      selectedSize,
-      selectedColor,
-      quantity: 1
-    });
-  };
+  const handleAddToCart = async (product) => {
+    try {
+      if (!currentUser) {
+        alert("Please log in to add items to cart.");
+        return;
+      }
 
+      const cartData = {
+        productId: id,
+        quantity: 1,
+        userId: currentUser._id, // from Redux
+      };
+
+      const response = await axios.post("/api/cart/add", cartData);
+
+      // If you want to update global state too
+      if (addToCart) {
+        await addToCart(response.data);
+      }
+
+      alert(`${product.name} added to cart!`);
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      alert("Failed to add item to cart. Please try again.");
+    }
+  };
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">

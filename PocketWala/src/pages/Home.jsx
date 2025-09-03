@@ -9,7 +9,6 @@ const Home = ({ addToCart }) => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
 
-  // ✅ Fix: in your slice it’s `currentUser`
   const { currentUser } = useSelector((state) => state.user);
 
   useEffect(() => {
