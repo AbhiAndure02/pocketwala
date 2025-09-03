@@ -1,4 +1,3 @@
-import { Button } from "flowbite-react";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -166,9 +165,9 @@ const Home = ({ addToCart }) => {
                     >
                       Add to Cart
                     </button>
-                    <Button>
+                    <button>
                       <Link to={`/order/${product._id }`}>Bulk Order</Link>
-                    </Button>
+                    </button>
                   </div>
                 </div>
               </div>

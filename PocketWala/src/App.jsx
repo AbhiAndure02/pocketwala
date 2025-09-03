@@ -12,6 +12,7 @@ import ProductPage from "./pages/ProductPage";
 import CartPage from "./pages/MyCart";
 import Footer from "./components/Footer";
 import UserList from "./admin/UserList";
+import Profile from "./pages/Profle";
 const App = () => {
   const [cart, setCart] = useState([]);
 
@@ -72,6 +73,8 @@ const App = () => {
         <Route path="/product/:id" element={<ProductPage />} />
         <Route path="/admin/users" element={<UserList />} />{" "}
         <Route path="/admin" element={<Admin />} />
+                <Route path="/profile" element={<Profile />} />
+
       </Routes>
       <Footer />
     </BrowserRouter>

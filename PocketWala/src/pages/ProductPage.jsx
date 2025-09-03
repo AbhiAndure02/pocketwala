@@ -221,7 +221,7 @@ const ProductPage = ({ addToCart }) => {
                   Add to Cart
                 </button>
                 <button className="px-6 py-3 bg-gray-200 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-300 transition-colors">
-                  Save for Later
+                 <Link to ={`/order/${product._id}`} >order in bulk</Link> 
                 </button>
               </div>
               

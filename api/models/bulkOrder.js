@@ -31,7 +31,7 @@ const orderItemSchema = new mongoose.Schema(
 const bulkOrderSchema = new mongoose.Schema(
   {
     userId: {
-      type: string,
+      type: String,
       required: false, // can be guest order too
     },
     items: {
